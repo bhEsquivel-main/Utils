@@ -106,7 +106,6 @@ static SaveFileManager* _saveFileMgr = nil;
         NSLog(@"Got an error: %@", error);
     } else {
         [self flush];
-//        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
         [self encryptData];
         [self saveState];
     }

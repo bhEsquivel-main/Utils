@@ -48,7 +48,7 @@ static CDSoundEngine* soundEngine = nil;
     
 }
 
-// Memory
+#pragma mark dealloc
 - (void) dealloc
 {
 	cdAudioMngr = nil;
@@ -59,10 +59,8 @@ static CDSoundEngine* soundEngine = nil;
 
 - (void)startEngine {
     [self loadPreferences];
-//    engine = [SimpleAudioEngine sharedEngine];
     cdAudioMngr.backgroundMusic.volume = _musicVolume;
     cdAudioMngr.soundEngine.masterGain = _sfxVolume;
-    
     
     // Check if current game is muted
     if([[SaveFileManager saveFileInstance] loadThisValueWithKey:MUTE_SAVE_KEY]){
@@ -242,9 +240,9 @@ static CDSoundEngine* soundEngine = nil;
 {
     int soundId = [bufferManager bufferForFile:effect create:YES];
 	if (soundId == kCDNoBuffer) {
-		CDLOG(@"Denshion::SimpleAudioEngine sound failed to preload %@",effect);
+		CDLOG(@"Denshion::Failed to preload SFX %@",effect);
 	} else {
-		CDLOG(@"Denshion::SimpleAudioEngine preloaded %@",effect);
+		CDLOG(@"Denshion::preloaded %@",effect);
 	}
 }
 -(ALuint) playSFX:(NSString *)effect
