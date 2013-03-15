@@ -7,12 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "SaveFile.h"
-
 @interface SaveFileManager : NSObject
 {
 
 }
+@property (nonatomic, retain) NSData *jsonSerialized;
 @property (nonatomic, retain) NSMutableDictionary *mutableDict;
 
 +(SaveFileManager*) saveFileInstance;
