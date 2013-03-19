@@ -1,8 +1,10 @@
 *******************
 COMPATIBILITY: iOS5 +
 *********************
+for cocos2d
+*********************
+With Screen SHot
+*********************
 
-
-With Twitter post
-Added Screenshot
-For Cocos2d
+Twitter post - Add Twitter.framework
+*****************
