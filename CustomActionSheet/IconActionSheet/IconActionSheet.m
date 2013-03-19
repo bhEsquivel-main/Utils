@@ -7,12 +7,19 @@
 //
 
 #import "IconActionSheet.h"
+#import "cocos2d.h"
+
+@interface IconActionSheet (PrivateMethods)
+-(void)animateView:(CGRect) rect;
+-(UIImage*) makeaShot;
+-(void)postTweetWithImage:(UIImage*)image;
+@end
+
 
 @implementation IconActionSheet
 
 @synthesize blocks;
 @synthesize collectionView;
-@synthesize isLandscape;
 
 static UIImage *background = nil;
 static UIFont *titleFont = nil;
@@ -34,23 +41,38 @@ static NSString *cellIdentifier = @"ActionCell";
     }
 }
 
-+ (id)sheetWithTitle:(NSString *)title isLandscape:(BOOL)orientation
++ (id)sheetWithTitle:(NSString *)title isLandscape:(NSInteger)orientation
 {
     
     return [[IconActionSheet alloc] initWithTitle:title isLandscape:orientation];
 }
 
-- (id)initWithTitle:(NSString *)title isLandscape:(BOOL)orientation
+- (id)initWithTitle:(NSString *)title isLandscape:(NSInteger)orientation
 {
-    isLandscape = orientation;
     CGRect frame = [[UIApplication sharedApplication] keyWindow].bounds;
     
     if ((self = [super initWithFrame:frame]))
     {
-//      Transform the view to left
-        if(orientation){
-            self.transform = CGAffineTransformMakeRotation((M_PI * (90.0 / 180.0)));
+        switch (orientation)
+        {
+            case UIDeviceOrientationPortrait: break;
+            case UIDeviceOrientationPortraitUpsideDown:
+                self.transform = CGAffineTransformMakeRotation(CC_DEGREES_TO_RADIANS(180));
+                break;
+            case UIDeviceOrientationLandscapeLeft:
+                self.transform = CGAffineTransformMakeRotation(CC_DEGREES_TO_RADIANS(90));
+                break;
+            case UIDeviceOrientationLandscapeRight:
+                self.transform = CGAffineTransformMakeRotation(CC_DEGREES_TO_RADIANS(-90));
+                break;
+            case UIDeviceOrientationUnknown:
+                break;
+            case UIDeviceOrientationFaceUp:
+                break;
+            case UIDeviceOrientationFaceDown:
+                break;
         }
+        
         self.blocks = [[NSMutableArray alloc] init];
         _height = kActionSheetTopMargin;
         
@@ -79,12 +101,12 @@ static NSString *cellIdentifier = @"ActionCell";
     return self;
 }
 
-- (void)addIconWithTitle:(NSString *)title image:(UIImage*)image block:(void (^)())block atIndex:(NSInteger)index
+- (void)addIconWithTitle:(NSString *)title image:(UIImage*)image iASAction:(IASSocialAction) action atIndex:(NSInteger)index
 {
     if (index >= 0)
     {
         [self.blocks insertObject:[NSArray arrayWithObjects:
-                               block ? [block copy] : [NSNull null],
+                               [NSNumber numberWithInteger:action],
                                title,
                                image,
                                nil]
@@ -93,7 +115,7 @@ static NSString *cellIdentifier = @"ActionCell";
     else
     {
         [self.blocks addObject:[NSArray arrayWithObjects:
-                            block ? [block copy] : [NSNull null],
+                            [NSNumber numberWithInteger:action],
                             title,
                             image,
                             nil]];
@@ -103,10 +125,24 @@ static NSString *cellIdentifier = @"ActionCell";
 - (void)dismissView
 {
     CGPoint center = self.center;
-    if(isLandscape){
-        center.x -= _height + kActionSheetBounce + 100;
-    }else{
-        center.y += self.bounds.size.height;
+    UIDeviceOrientation orientation = [[CCDirector sharedDirector] deviceOrientation];
+    switch (orientation)
+    {
+        case UIDeviceOrientationPortrait:
+            center.y += self.bounds.size.height;
+            break;
+        case UIDeviceOrientationPortraitUpsideDown:
+            center.y -= self.bounds.size.height;
+            break;
+        case UIDeviceOrientationLandscapeLeft:
+            center.x -= _height + kActionSheetBounce + 100;
+            break;
+        case UIDeviceOrientationLandscapeRight:
+            center.x += _height + kActionSheetBounce + 100;
+             break;
+        case UIDeviceOrientationUnknown: break;
+        case UIDeviceOrientationFaceUp: break;
+        case UIDeviceOrientationFaceDown: break;
     }
     [UIView animateWithDuration:kAnimationDuration
                           delay:0.0
@@ -122,20 +158,31 @@ static NSString *cellIdentifier = @"ActionCell";
 {
     
     CGRect kBGFrameTransformed;
+    int hgt_phone;
     if(IS_IPHONE_5){
-        if(isLandscape){
-            kBGFrameTransformed =  CGRectMake(0, 0, 568, 320);
-        }else{
-            kBGFrameTransformed =  CGRectMake(0, 0, 320, 568);
-        }
+        hgt_phone = 568;
     }else{
-        if(isLandscape){
-            kBGFrameTransformed =  CGRectMake(0, 0, 480, 320);
-        }else{
-            kBGFrameTransformed =  CGRectMake(0, 0, 320, 480);
-        }
+        hgt_phone = 480;
     }
-    
+    UIDeviceOrientation orientation = [[CCDirector sharedDirector] deviceOrientation];
+    switch (orientation)
+    {
+        case UIDeviceOrientationPortrait:
+            kBGFrameTransformed =  CGRectMake(0, 0, 320, hgt_phone);
+            break;
+        case UIDeviceOrientationPortraitUpsideDown:
+            kBGFrameTransformed =  CGRectMake(320, hgt_phone, 320, hgt_phone);
+            break;
+        case UIDeviceOrientationLandscapeLeft:
+            kBGFrameTransformed =  CGRectMake(0, 0, hgt_phone, 320);
+            break;
+        case UIDeviceOrientationLandscapeRight:
+            kBGFrameTransformed =  CGRectMake(320, hgt_phone, hgt_phone, 320);
+            break;
+        case UIDeviceOrientationUnknown: break;
+        case UIDeviceOrientationFaceUp: break;
+        case UIDeviceOrientationFaceDown: break;
+    }
     PSTCollectionViewFlowLayout *flowLayout = [[PSTCollectionViewFlowLayout alloc] init];
     [flowLayout setScrollDirection:PSTCollectionViewScrollDirectionHorizontal];
     int insetSideMargin;
@@ -152,7 +199,6 @@ static NSString *cellIdentifier = @"ActionCell";
     [flowLayout setMinimumLineSpacing:kLineSpacing];
     
     double columns = floor((kBGFrameTransformed.size.width-kActionSheetBorder*2) / (kCellWidth+kItemSpacing));
-    NSLog(@"columns %f", columns);
     double rows = ceil(blocks.count / columns);
     
     //Limit maximum rows to 3
@@ -199,7 +245,6 @@ static NSString *cellIdentifier = @"ActionCell";
     [self addSubview:button];
     _height += button.frame.size.height + kActionSheetBorder;    
     
-    
     UIImageView *modalBackground = [[UIImageView alloc] initWithFrame:kBGFrameTransformed];
     modalBackground.image = background;
     modalBackground.contentMode = UIViewContentModeScaleToFill;
@@ -215,22 +260,45 @@ static NSString *cellIdentifier = @"ActionCell";
 {
     CGRect frame = rect;
     __block CGPoint center;
-    if(isLandscape){
-        frame.origin.x = -200;
-        frame.size.height = 480;
-        frame.size.width = _height + kActionSheetBounce;
-        self.frame = frame;
-        center = self.center;
-        center.x += 200;
-    }else{
-        frame.origin.y = rect.size.height;
-        frame.size.height = _height + kActionSheetBounce;
-        self.frame = frame;
-        center = self.center;
-        center.y -= _height + kActionSheetBounce;
-    }
     
-
+    UIDeviceOrientation orientation = [[CCDirector sharedDirector] deviceOrientation];
+    switch (orientation)
+    {
+        case UIDeviceOrientationPortrait:
+            frame.origin.y = rect.size.height;
+            frame.size.height = _height + kActionSheetBounce;
+            self.frame = frame;
+            center = self.center;
+            center.y -= _height + kActionSheetBounce;
+            break;
+        case UIDeviceOrientationPortraitUpsideDown:
+            frame.origin.y = -(rect.size.height);
+            frame.size.height = -(_height + kActionSheetBounce);
+            self.frame = frame;
+            center = self.center;
+            center.y += _height + kActionSheetBounce;
+            break;
+        case UIDeviceOrientationLandscapeLeft:
+            frame.origin.x = -200;
+            frame.size.height = 480;
+            frame.size.width = _height + kActionSheetBounce;
+            self.frame = frame;
+            center = self.center;
+            center.x += 200;
+            break;
+        case UIDeviceOrientationLandscapeRight:
+            frame.origin.x = frame.origin.x + 200;
+            frame.size.height = -(480);
+            frame.size.width = -(_height + kActionSheetBounce);
+            self.frame = frame;
+            NSLog(@"frame %@", NSStringFromCGRect(self.frame));
+            center = self.center;
+            center.x -= 200;
+            break;
+        case UIDeviceOrientationUnknown: break;
+        case UIDeviceOrientationFaceUp: break;
+        case UIDeviceOrientationFaceDown: break;
+    }
     
     [UIView animateWithDuration:kAnimationDuration
                           delay:0.0
@@ -242,11 +310,26 @@ static NSString *cellIdentifier = @"ActionCell";
                                                delay:0.0
                                              options:UIViewAnimationOptionAllowUserInteraction
                                           animations:^{
-                                              if(isLandscape){
-                                                  center.x -= kActionSheetBounce;
-                                              }else{
-                                                  center.y += kActionSheetBounce;
+                                              UIDeviceOrientation orientations = [[CCDirector sharedDirector] deviceOrientation];
+                                              switch (orientations)
+                                              {
+                                                  case UIDeviceOrientationPortrait:
+                                                      center.y += kActionSheetBounce;
+                                                      break;
+                                                  case UIDeviceOrientationPortraitUpsideDown:
+                                                      center.y -= kActionSheetBounce;
+                                                      break;
+                                                  case UIDeviceOrientationLandscapeLeft:
+                                                      center.x -= kActionSheetBounce;
+                                                      break;
+                                                  case UIDeviceOrientationLandscapeRight:
+                                                      center.x += kActionSheetBounce;
+                                                      break;
+                                                  case UIDeviceOrientationUnknown: break;
+                                                  case UIDeviceOrientationFaceUp: break;
+                                                  case UIDeviceOrientationFaceDown: break;
                                               }
+
                                               self.center = center;
                                           } completion:nil];
                      }];
@@ -284,10 +367,100 @@ static NSString *cellIdentifier = @"ActionCell";
 }
 -(void)collectionView:(PSTCollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     id obj = [[self.blocks objectAtIndex:indexPath.row] objectAtIndex:0];
-    if (![obj isEqual:[NSNull null]])
-    {
-        ((void (^)())obj)();
-    }
+        UIImage *image = [self makeaShot];
+        switch ([obj integerValue])
+        {
+            case IASSocialActionTwitter:
+                NSLog(@"Twitter PRessed");
+                if ([TWTweetComposeViewController canSendTweet])
+                {
+                    [self postTweetWithImage:image];
+                }
+                else
+                {
+                    UIAlertView *alertView = [[UIAlertView alloc]
+                                              initWithTitle:@"Sorry"
+                                              message:@"You can't send a tweet right now, make sure                                      your device has an internet connection and you have                                      at least one Twitter account setup"
+                                              delegate:self
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+                    [alertView show];
+                    [alertView release];
+                }
+                
+                break;
+            case IASSocialActionFacebook:
+                 NSLog(@"Facebook Pressed");
+            case IASSocialActionUnknown:
+                NSLog(@"Unknown pressed");
+                break;
+        }
+
+    [self dismissView];
+}
+
+
+#pragma mark Social Post
+
+-(void)postTweetWithImage:(UIImage*)image
+{
+    TWTweetComposeViewController *tweetSheet =
+    [[TWTweetComposeViewController alloc] init];
+    [tweetSheet setInitialText:
+     @"Screenshot testing"];
+    [tweetSheet addImage:image];
+    
+    UIViewController* _tmpView = [[UIViewController alloc] initWithNibName:nil bundle:nil];
+    [[[CCDirector sharedDirector] openGLView] addSubview:_tmpView.view];
+    [_tmpView presentModalViewController:tweetSheet animated:YES];
+    //[tweetSheet presentModalViewController:tweetSheet animated:YES];
+    // Setting a Completing Handler
+    [tweetSheet setCompletionHandler:^(TWTweetComposeViewControllerResult result) {
+        if (result == TWTweetComposeViewControllerResultDone) {
+            // Composed
+            UIAlertView *alertView = [[UIAlertView alloc]
+                                      initWithTitle:@"Congratulations"
+                                      message:@"Post has already been tweeted!"
+                                      delegate:self
+                                      cancelButtonTitle:@"OK"
+                                      otherButtonTitles:nil];
+            [alertView show];
+            [alertView release];
+            [_tmpView dismissModalViewControllerAnimated:YES];
+        } else if (result == TWTweetComposeViewControllerResultCancelled) {
+            // Cancelled
+            UIAlertView *alertView = [[UIAlertView alloc]
+                                      initWithTitle:@"Cancelled"
+                                      message:@"Post has been cancelled!"
+                                      delegate:self
+                                      cancelButtonTitle:@"OK"
+                                      otherButtonTitles:nil];
+            [alertView show];
+            [alertView release];
+            [_tmpView dismissModalViewControllerAnimated:YES];
+        }
+    }];
+
+}
+
+#pragma mark Screencapture
+
+-(UIImage*) makeaShot
+{
+    [CCDirector sharedDirector].nextDeltaTimeZero = YES;
+    
+    CGSize winSize = [CCDirector sharedDirector].winSize;
+    
+    CCColorLayer *whitePage = [CCColorLayer layerWithColor:ccc4(255, 255, 255, 0) width:winSize.width height:winSize.height];
+    whitePage.position = ccp(winSize.width/2, winSize.height/2);
+    
+    CCRenderTexture* rtx = [CCRenderTexture renderTextureWithWidth:winSize.width height:winSize.height];
+    [rtx begin];
+    [whitePage visit];
+    [[[CCDirector sharedDirector] runningScene] visit];
+    [rtx end];
+    
+    return [rtx getUIImageFromBuffer];
 }
 
 @end

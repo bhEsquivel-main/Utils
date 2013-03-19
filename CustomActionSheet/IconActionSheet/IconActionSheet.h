@@ -10,6 +10,7 @@
 #import <math.h>
 #import "ActionCell.h"
 #import "PSTCollectionView.h"
+ #import <Twitter/Twitter.h>
 
 #ifndef IconActionSheet_h
 #define IconActionSheet_h
@@ -42,6 +43,12 @@
 
 #endif
 
+typedef NS_ENUM(NSInteger, IASSocialAction) {
+    IASSocialActionUnknown,
+    IASSocialActionTwitter, //When Posting to Twitter
+    IASSocialActionFacebook //Posting to Facebook
+};
+
 @interface IconActionSheet : UIView <PSTCollectionViewDelegate, PSTCollectionViewDataSource, PSTCollectionViewDelegateFlowLayout> {
 @private
     CGFloat _height;
@@ -50,15 +57,13 @@
 
 @property (nonatomic, retain) NSMutableArray *blocks;
 @property (nonatomic, retain) PSTCollectionView *collectionView;
-@property (nonatomic) BOOL isLandscape;
 
-+ (id)sheetWithTitle:(NSString *)title isLandscape:(BOOL)orientation;
++ (id)sheetWithTitle:(NSString *)title isLandscape:(NSInteger)orientation;
 
-- (id)initWithTitle:(NSString *)title isLandscape:(BOOL)orientation;
-
-- (void)addIconWithTitle:(NSString *)title image:(UIImage*)image block:(void (^)())block atIndex:(NSInteger)index;
+- (id)initWithTitle:(NSString *)title isLandscape:(NSInteger)orientation;
+- (void)addIconWithTitle:(NSString *)title image:(UIImage*)image iASAction:(IASSocialAction) action atIndex:(NSInteger)index;
 - (void)showInView:(UIView *)view;
 - (void)dismissView;
-- (void)animateView:(CGRect) rect;
+
 
 @end
