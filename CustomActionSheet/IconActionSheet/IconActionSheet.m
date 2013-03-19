@@ -13,6 +13,8 @@
 -(void)animateView:(CGRect) rect;
 -(UIImage*) makeaShot;
 -(void)postTweetWithImage:(UIImage*)image;
+-(void)postFacebookWithImage:(UIImage*)image;
+-(void)postFacebookWithImageIOS6Below:(UIImage*)image;
 @end
 
 
@@ -43,7 +45,6 @@ static NSString *cellIdentifier = @"ActionCell";
 
 + (id)sheetWithTitle:(NSString *)title isLandscape:(NSInteger)orientation
 {
-    
     return [[IconActionSheet alloc] initWithTitle:title isLandscape:orientation];
 }
 
@@ -380,7 +381,7 @@ static NSString *cellIdentifier = @"ActionCell";
                 {
                     UIAlertView *alertView = [[UIAlertView alloc]
                                               initWithTitle:@"Sorry"
-                                              message:@"You can't send a tweet right now, make sure                                      your device has an internet connection and you have                                      at least one Twitter account setup"
+                                              message:@"You can't send a tweet right now, make sure your device has an internet connection and you have at least one Twitter account setup"
                                               delegate:self
                                               cancelButtonTitle:@"OK"
                                               otherButtonTitles:nil];
@@ -390,7 +391,25 @@ static NSString *cellIdentifier = @"ActionCell";
                 
                 break;
             case IASSocialActionFacebook:
-                 NSLog(@"Facebook Pressed");
+                NSLog(@"Facebook Pressed");
+                if (![UIDevice de_isIOS6]) {
+                    [self postFacebookWithImageIOS6Below:image];
+                }else{
+                    if([SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]){
+//
+                        [self postFacebookWithImage:image];
+                    }else{
+                        UIAlertView *alertView = [[UIAlertView alloc]
+                                                initWithTitle:@"Sorry"
+                                                message:@"You can't post a timeline right now, make sure your device has an internet connection and you have at least one Facebook account setup"
+                                                delegate:self
+                                                cancelButtonTitle:@"OK"
+                                                otherButtonTitles:nil];
+                        [alertView show];
+                        [alertView release];
+                    }
+                }
+                break;
             case IASSocialActionUnknown:
                 NSLog(@"Unknown pressed");
                 break;
@@ -413,14 +432,13 @@ static NSString *cellIdentifier = @"ActionCell";
     UIViewController* _tmpView = [[UIViewController alloc] initWithNibName:nil bundle:nil];
     [[[CCDirector sharedDirector] openGLView] addSubview:_tmpView.view];
     [_tmpView presentModalViewController:tweetSheet animated:YES];
-    //[tweetSheet presentModalViewController:tweetSheet animated:YES];
     // Setting a Completing Handler
     [tweetSheet setCompletionHandler:^(TWTweetComposeViewControllerResult result) {
         if (result == TWTweetComposeViewControllerResultDone) {
             // Composed
             UIAlertView *alertView = [[UIAlertView alloc]
                                       initWithTitle:@"Congratulations"
-                                      message:@"Post has already been tweeted!"
+                                      message:@"Post has already been sent!"
                                       delegate:self
                                       cancelButtonTitle:@"OK"
                                       otherButtonTitles:nil];
@@ -441,6 +459,92 @@ static NSString *cellIdentifier = @"ActionCell";
         }
     }];
 
+}
+
+-(void) postFacebookWithImage:(UIImage *)image
+{
+     SLComposeViewController *fbComposer =
+    [SLComposeViewController
+     composeViewControllerForServiceType:SLServiceTypeFacebook];
+    
+    UIViewController* _tmpView = [[UIViewController alloc] initWithNibName:nil bundle:nil];
+    [[[CCDirector sharedDirector] openGLView] addSubview:_tmpView.view];
+   
+    
+        SLComposeViewControllerCompletionHandler __block completionHandler=
+        ^(SLComposeViewControllerResult result){
+            
+            [fbComposer dismissViewControllerAnimated:YES completion:nil];
+            
+            switch(result){
+                case SLComposeViewControllerResultCancelled:
+                default:
+                {
+                    NSLog(@"Cancelled.....");
+                    
+                }
+                    break;
+                case SLComposeViewControllerResultDone:
+                {
+                    NSLog(@"Posted....");
+                    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Congratulations"
+                                                                     message:nil
+                                                                    delegate:nil
+                                                           cancelButtonTitle:@"Post has already been sent!"
+                                                           otherButtonTitles: nil];
+                    [alert show];
+                    [alert release];
+                }
+                    break;
+            }};
+        
+        [fbComposer addImage:image];
+        [fbComposer setInitialText:@"Can you beat me?"];
+//        [fbComposer addURL:[NSURL URLWithString:@"https://developers.facebook.com/ios"]];
+        [fbComposer setCompletionHandler:completionHandler];
+        [_tmpView presentModalViewController:fbComposer animated:YES];
+        [fbComposer release];
+   
+}
+
+-(void)postFacebookWithImageIOS6Below:(UIImage *)image
+{
+    DEFacebookComposeViewController *facebookViewComposer = [[DEFacebookComposeViewController alloc] init];
+    UIViewController* _tmpView = [[UIViewController alloc] initWithNibName:nil bundle:nil];
+    [[[CCDirector sharedDirector] openGLView] addSubview:_tmpView.view];
+    [facebookViewComposer setInitialText:@"Can you beat me?"];
+    _tmpView.modalPresentationStyle = UIModalPresentationCurrentContext;
+    // optional
+    [facebookViewComposer addImage:image];
+    // and/or
+    // optional
+    //    [facebookViewComposer addURL:[NSURL URLWithString:@"http://applications.3d4medical.com/heart_pro.php"]];
+    [facebookViewComposer setCompletionHandler:^(DEFacebookComposeViewControllerResult result) {
+        switch (result) {
+            case DEFacebookComposeViewControllerResultCancelled:
+                NSLog(@"Facebook Result: Cancelled");
+                break;
+            case DEFacebookComposeViewControllerResultDone:
+                NSLog(@"Posted....");
+                UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Congratulations"
+                                                                 message:nil
+                                                                delegate:nil
+                                                       cancelButtonTitle:@"Post has already been sent!"
+                                                       otherButtonTitles: nil];
+                [alert show];
+                [alert release];
+                break;
+        }
+        
+        [_tmpView dismissModalViewControllerAnimated:YES];
+    }];
+    [_tmpView presentModalViewController:facebookViewComposer animated:YES];
+    [facebookViewComposer release];
+}
+
+-(void)postFacebookOpenGraph:(UIImage*)image
+{
+//    [FacebookUnityManager sharedManager] postUserFeed];
 }
 
 #pragma mark Screencapture

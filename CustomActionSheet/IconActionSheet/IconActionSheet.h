@@ -10,7 +10,13 @@
 #import <math.h>
 #import "ActionCell.h"
 #import "PSTCollectionView.h"
- #import <Twitter/Twitter.h>
+#import <Twitter/Twitter.h>
+#import <Social/Social.h>
+#import "DEFacebookComposeViewController.h"
+#import <FacebookSDK/FacebookSDK.h>
+#import "UIDevice+DEFacebookComposeViewController.h"
+
+
 
 #ifndef IconActionSheet_h
 #define IconActionSheet_h
