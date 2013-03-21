@@ -127,10 +127,10 @@ static NSString *cellIdentifier = @"ActionCell";
 {
     CGPoint center = self.center;
     
-    //   UIDeviceOrientation orientation = [[CCDirectorIOS sharedDirector] deviceOrientation];
+    UIDeviceOrientation orientation = [[CCDirector sharedDirector] deviceOrientation];
     
     //use if above is deprecated
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+//    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
     switch (orientation)
     {
         case UIDeviceOrientationPortrait:
@@ -270,10 +270,10 @@ static NSString *cellIdentifier = @"ActionCell";
     CGRect frame = rect;
     __block CGPoint center;
     
-    //   UIDeviceOrientation orientation = [[CCDirectorIOS sharedDirector] deviceOrientation];
+    UIDeviceOrientation orientation = [[CCDirector sharedDirector] deviceOrientation];
     
     //use if above is deprecated
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+//    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
     switch (orientation)
     {
         case UIDeviceOrientationPortrait:
@@ -322,10 +322,10 @@ static NSString *cellIdentifier = @"ActionCell";
                                                delay:0.0
                                              options:UIViewAnimationOptionAllowUserInteraction
                                           animations:^{
-                                              //   UIDeviceOrientation orientations = [[CCDirectorIOS sharedDirector] deviceOrientation];
+                                              UIDeviceOrientation orientations = [[CCDirector sharedDirector] deviceOrientation];
                                               
                                               //use if above is deprecated
-                                              UIDeviceOrientation orientations = [[UIDevice currentDevice] orientation];
+                                              //UIDeviceOrientation orientations = [[UIDevice currentDevice] orientation];
                                               switch (orientations)
                                               {
                                                   case UIDeviceOrientationPortrait:
@@ -444,9 +444,9 @@ static NSString *cellIdentifier = @"ActionCell";
     [tweetSheet addImage:image];
     
     UIViewController* _tmpView = [[UIViewController alloc] initWithNibName:nil bundle:nil];
-//    [[[CCDirector sharedDirector] openGLView] addSubview:_tmpView.view];
+    [[[CCDirector sharedDirector] openGLView] addSubview:_tmpView.view];
     //Use if deprecated
-    [[[CCDirector sharedDirector] view] addSubview:_tmpView.view];
+//    [[[CCDirector sharedDirector] view] addSubview:_tmpView.view];
     
     [_tmpView presentModalViewController:tweetSheet animated:YES];
     // Setting a Completing Handler
@@ -485,10 +485,10 @@ static NSString *cellIdentifier = @"ActionCell";
      composeViewControllerForServiceType:SLServiceTypeFacebook];
     
     UIViewController* _tmpView = [[UIViewController alloc] initWithNibName:nil bundle:nil];
-//    [[[CCDirector sharedDirector] openGLView] addSubview:_tmpView.view];
+    [[[CCDirector sharedDirector] openGLView] addSubview:_tmpView.view];
     
     //Use if above is deprecated
-    [[[CCDirector sharedDirector] view] addSubview:_tmpView.view];
+//    [[[CCDirector sharedDirector] view] addSubview:_tmpView.view];
     
         SLComposeViewControllerCompletionHandler __block completionHandler=
         ^(SLComposeViewControllerResult result){
@@ -530,10 +530,10 @@ static NSString *cellIdentifier = @"ActionCell";
 {
     DEFacebookComposeViewController *facebookViewComposer = [[DEFacebookComposeViewController alloc] init];
     UIViewController* _tmpView = [[UIViewController alloc] initWithNibName:nil bundle:nil];
-    //    [[[CCDirector sharedDirector] openGLView] addSubview:_tmpView.view];
+    [[[CCDirector sharedDirector] openGLView] addSubview:_tmpView.view];
     
     //Use if above is deprecated
-    [[[CCDirector sharedDirector] view] addSubview:_tmpView.view];
+//    [[[CCDirector sharedDirector] view] addSubview:_tmpView.view];
     
     [facebookViewComposer setInitialText:@"Can you beat me?"];
     _tmpView.modalPresentationStyle = UIModalPresentationCurrentContext;
@@ -578,9 +578,9 @@ static NSString *cellIdentifier = @"ActionCell";
     
     CGSize winSize = [CCDirector sharedDirector].winSize;
     
-//    CCColorLayer *whitePage = [CCColorLayer layerWithColor:ccc4(255, 255, 255, 0) width:winSize.width height:winSize.height];
+    CCColorLayer *whitePage = [CCColorLayer layerWithColor:ccc4(255, 255, 255, 0) width:winSize.width height:winSize.height];
     //use if above is deprecated
-    CCLayerColor *whitePage = [CCLayerColor layerWithColor:ccc4(255, 255, 255, 0) width:winSize.width height:winSize.height];
+//    CCLayerColor *whitePage = [CCLayerColor layerWithColor:ccc4(255, 255, 255, 0) width:winSize.width height:winSize.height];
     whitePage.position = ccp(winSize.width/2, winSize.height/2);
     
     CCRenderTexture* rtx = [CCRenderTexture renderTextureWithWidth:winSize.width height:winSize.height];
@@ -589,9 +589,9 @@ static NSString *cellIdentifier = @"ActionCell";
     [[[CCDirector sharedDirector] runningScene] visit];
     [rtx end];
     
-//    return [rtx getUIImageFromBuffer];
+    return [rtx getUIImageFromBuffer];
     //use if above is deprecated
-    return [rtx getUIImage];
+//    return [rtx getUIImage];
 }
 
 @end
