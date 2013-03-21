@@ -65,6 +65,7 @@
 
 - (void)dealloc {
     if(_sectionItemCounts) free(_sectionItemCounts);
+    [super dealloc];
 }
 
 - (NSString *)description {

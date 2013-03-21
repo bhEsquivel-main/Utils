@@ -1,0 +1,14 @@
+add To Link Binaries
+(Choose Optional)
+- Twitter.framework
+-Accounts.framework
+-AdSupport.framework
+-Social.framework
+-FacebookSDK.framework - 
+
+	-for Facebook: add URL TYPES, and on the plist ad FacebookAppID
+
+
+add to "Other Link Flags"
+-lsqlite3.0
+
